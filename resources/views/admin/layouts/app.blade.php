@@ -203,6 +203,12 @@
             <span class="sidebar-label">Informasi</span>
         </a>
 
+        <a href="{{ route('admin.ticker.index') }}" data-spa
+           class="nav-item" data-route="admin.ticker.index">
+            <span class="icon">📰</span>
+            <span class="sidebar-label">Ticker Beranda</span>
+        </a>
+
         <a href="{{ route('admin.kegiatan-sekolah.index') }}" data-spa
            class="nav-item" data-route="admin.kegiatan-sekolah.index">
             <span class="icon">🎉</span>
@@ -219,6 +225,12 @@
            class="nav-item" data-route="admin.ekstrakurikuler.index">
             <span class="icon">🏅</span>
             <span class="sidebar-label">Ekstrakurikuler</span>
+        </a>
+
+        <a href="{{ route('admin.fasilitas.index') }}" data-spa
+           class="nav-item" data-route="admin.fasilitas.index">
+            <span class="icon">🏫</span>
+            <span class="sidebar-label">Fasilitas</span>
         </a>
 
         <!-- ── Sistem ── -->

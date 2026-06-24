@@ -12,10 +12,13 @@
     .anim-3 { animation: fadeUp .7s .3s ease both; }
     .anim-4 { animation: fadeUp .7s .45s ease both; }
     .anim-5 { animation: fadeUp .7s .6s ease both; }
-    .stat-card { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); transition: transform .25s, background .25s; }
-    .stat-card:hover { transform:translateY(-6px); background:rgba(255,255,255,0.18); }
-    @keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
-    .animate-marquee { display:inline-block; animation: marquee 30s linear infinite; }
+    .stat-card { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .25s, box-shadow .25s; }
+    .stat-card:hover { transform:translateY(-8px) scale(1.03); background:rgba(255,255,255,0.20); box-shadow:0 16px 40px rgba(0,0,0,0.18); }
+    @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+    .animate-marquee { display:inline-block; animation: marquee 25s linear infinite; }
+    .ticker-track { display:flex; animation: ticker-scroll 25s linear infinite; }
+    .ticker-item  { flex-shrink:0; }
+    @keyframes ticker-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
     .sec-label { color:var(--teal); letter-spacing:.1em; font-size:.75rem; font-weight:700; text-transform:uppercase; }
     .sec-title  { color:var(--navy); font-weight:800; }
     .sec-divider { display:inline-block; width:48px; height:4px; border-radius:2px; background: linear-gradient(90deg, var(--teal), var(--gold)); margin-top:8px; margin-bottom:12px; }
@@ -57,13 +60,30 @@
                 <a href="{{ route('kandidat.create') }}" class="btn-ghost-white font-semibold px-7 py-3 rounded-xl text-sm">Pendaftaran PPDB</a>
             </div>
         </div>
+        <!-- STAT CARDS -->
         <div class="grid grid-cols-2 gap-4 anim-3">
-            @php $stats = [['1.200+','Siswa Aktif','🎓'],['85+','Tenaga Pendidik','👨‍🏫'],['200+','Prestasi Diraih','🏆'],['20+','Ekstrakurikuler','⚽']]; @endphp
-            @foreach($stats as [$num,$label,$icon])
-            <div class="stat-card rounded-2xl p-6 text-center">
-                <div class="text-3xl mb-1">{{ $icon }}</div>
-                <p class="text-3xl font-black" style="color:#F9C940;">{{ $num }}</p>
-                <p class="text-sm mt-1" style="color:rgba(255,255,255,0.75);">{{ $label }}</p>
+            @php
+            $statCards = [
+                ['value' => $stats['siswa'],            'label' => 'Siswa Aktif',     'icon' => '🎓', 'delay' => '0s'],
+                ['value' => $stats['guru'],              'label' => 'Tenaga Pendidik', 'icon' => '👨‍🏫', 'delay' => '.1s'],
+                ['value' => $stats['prestasi'],          'label' => 'Prestasi Diraih', 'icon' => '🏆', 'delay' => '.2s'],
+                ['value' => $stats['ekstrakurikuler'],   'label' => 'Ekstrakurikuler', 'icon' => '⚽', 'delay' => '.3s'],
+            ];
+            @endphp
+            @foreach($statCards as $s)
+            <div class="stat-card rounded-2xl p-6 text-center group" style="animation-delay:{{ $s['delay'] }};">
+                <!-- icon with subtle pulse ring -->
+                <div class="relative inline-flex items-center justify-center mb-2">
+                    <span class="absolute inset-0 rounded-full bg-white opacity-10 scale-125 group-hover:scale-150 transition-transform duration-500"></span>
+                    <span class="text-4xl">{{ $s['icon'] }}</span>
+                </div>
+                <!-- animated number -->
+                <p class="text-3xl font-black leading-none mt-1 stat-counter"
+                   data-target="{{ $s['value'] }}"
+                   style="color:#F9C940;">0</p>
+                <!-- thin accent line -->
+                <div class="mx-auto my-2 rounded-full" style="width:32px;height:2px;background:rgba(249,201,64,0.5);"></div>
+                <p class="text-sm font-semibold" style="color:rgba(255,255,255,0.80);">{{ $s['label'] }}</p>
             </div>
             @endforeach
         </div>
@@ -76,19 +96,21 @@
 </section>
 
 <!-- ═══════════ TICKER ═══════════ -->
+@if($tickers->isNotEmpty())
 <div class="overflow-hidden py-2.5 px-4" style="background:var(--teal-dark);">
     <div class="max-w-7xl mx-auto flex items-center gap-4">
         <span class="text-xs font-extrabold px-2.5 py-1 rounded-full whitespace-nowrap shrink-0" style="background:var(--gold); color:#fff;">📢 INFO</span>
         <div class="overflow-hidden flex-1">
-            <p class="text-sm text-white whitespace-nowrap animate-marquee">
-                🎓 PPDB {{ $tahunAjaran }} telah dibuka — daftarkan segera &nbsp;|&nbsp;
-                🏆 Tim Olimpiade Sains meraih Juara 1 Tingkat Provinsi &nbsp;|&nbsp;
-                📚 Ujian Akhir Semester Genap: 10–20 Juni 2025 &nbsp;|&nbsp;
-                🌿 SMK Muhammadiyah Sempor raih penghargaan Sekolah Adiwiyata
-            </p>
+            {{-- Teks diduplikat agar loop terlihat seamless tanpa jeda --}}
+            <div class="ticker-track flex whitespace-nowrap">
+                @php $tickerText = $tickers->map(fn($t) => $t->icon . ' ' . $t->konten)->implode(' &nbsp;|&nbsp; '); @endphp
+                <span class="ticker-item text-sm text-white pr-16">{!! $tickerText !!}</span>
+                <span class="ticker-item text-sm text-white pr-16" aria-hidden="true">{!! $tickerText !!}</span>
+            </div>
         </div>
     </div>
 </div>
+@endif
 
 <!-- ═══════════ QUICK LINKS ═══════════ -->
 <section class="py-16 px-4" style="background:#F0F7F9;">
@@ -170,5 +192,54 @@
     </div>
 </section>
 @endif
+
+@push('scripts')
+<script>
+(function () {
+    /* ── Count-up animation triggered when cards enter the viewport ── */
+    function countUp(el) {
+        const target   = parseInt(el.dataset.target, 10);
+        const duration = 1800; // ms
+        const step     = 16;   // ~60 fps
+        const increment = target / (duration / step);
+        let current = 0;
+
+        // Format with thousand-dot separator for 1000+
+        function fmt(n) {
+            return target >= 1000
+                ? Math.floor(n).toLocaleString('id-ID')
+                : Math.floor(n).toString();
+        }
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            el.textContent = fmt(current);
+        }, step);
+    }
+
+    const counters = document.querySelectorAll('.stat-counter');
+
+    if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    countUp(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.4 });
+
+        counters.forEach(el => obs.observe(el));
+    } else {
+        // Fallback for old browsers
+        counters.forEach(el => countUp(el));
+    }
+})();
+</script>
+@endpush
 
 @endsection

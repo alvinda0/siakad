@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Informasi;
 use App\Models\KandidatProfile;
 use App\Models\KegiatanSekolah;
+use App\Models\Fasilitas;
 use App\Models\Prestasi;
 use App\Models\Ekstrakurikuler;
 use Illuminate\Http\Request;
@@ -61,7 +62,21 @@ class PublicController extends Controller
      */
     public function fasilitas()
     {
-        return view('pages.fasilitas');
+        $fasilitas = Fasilitas::aktif()
+            ->orderBy('urutan')
+            ->orderBy('nama')
+            ->get();
+
+        $grouped = $fasilitas->groupBy('kategori');
+
+        $stats = [
+            'total'      => $fasilitas->count(),
+            'akademik'   => $fasilitas->where('kategori', 'Akademik')->count(),
+            'olahraga'   => $fasilitas->where('kategori', 'Olahraga')->count(),
+            'kesehatan'  => $fasilitas->where('kategori', 'Kesehatan')->count(),
+        ];
+
+        return view('pages.fasilitas', compact('fasilitas', 'grouped', 'stats'));
     }
 
     /**
