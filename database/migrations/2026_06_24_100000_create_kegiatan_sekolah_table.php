@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('kegiatan_sekolah', function (Blueprint $table) {
+            $table->id();
+            $table->string('judul');
+            $table->string('icon')->default('🎓');         // emoji ikon
+            $table->enum('kategori', ['Akademik', 'Nasional', 'Seni', 'Olahraga', 'Lingkungan', 'Lainnya'])->index();
+            $table->string('tanggal_kegiatan');             // teks fleksibel: "2 Mei 2025" / "24–26 Juni 2025"
+            $table->text('deskripsi')->nullable();
+            $table->boolean('aktif')->default(true);
+            $table->integer('urutan')->default(0);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('kegiatan_sekolah');
+    }
+};

@@ -6,17 +6,31 @@ use App\Http\Controllers\Admin\AbsensiController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\InformasiController;
 use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\KegiatanSekolahController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\MuridController;
 use App\Http\Controllers\Admin\NilaiController;
 use App\Http\Controllers\Admin\KandidatController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home');
-})->name('beranda');
+Route::get('/', [HomeController::class, 'index'])->name('beranda');
+
+/*
+|--------------------------------------------------------------------------
+| Halaman Publik — Profil Sekolah
+|--------------------------------------------------------------------------
+*/
+Route::get('/kegiatan',        [PublicController::class, 'kegiatan'])->name('kegiatan');
+Route::get('/prestasi',        [PublicController::class, 'prestasi'])->name('prestasi');
+Route::get('/ekstrakurikuler', [PublicController::class, 'ekstrakurikuler'])->name('ekstrakurikuler');
+Route::get('/fasilitas',       [PublicController::class, 'fasilitas'])->name('fasilitas');
+Route::get('/pengumuman',      [PublicController::class, 'pengumuman'])->name('pengumuman');
+Route::get('/informasi',       [PublicController::class, 'informasi'])->name('informasi');
+Route::get('/kontak',          [PublicController::class, 'kontak'])->name('kontak');
 
 /*
 |--------------------------------------------------------------------------
@@ -126,6 +140,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{informasi}',                     [InformasiController::class, 'update'])->name('update');
             Route::delete('/{informasi}',                  [InformasiController::class, 'destroy'])->name('destroy');
             Route::patch('/{informasi}/toggle-aktif',      [InformasiController::class, 'toggleAktif'])->name('toggle-aktif');
+        });
+
+        // Kegiatan Sekolah
+        Route::prefix('kegiatan-sekolah')->name('kegiatan-sekolah.')->group(function () {
+            Route::get('/',                                        [KegiatanSekolahController::class, 'index'])->name('index');
+            Route::post('/',                                       [KegiatanSekolahController::class, 'store'])->name('store');
+            Route::put('/{kegiatanSekolah}',                       [KegiatanSekolahController::class, 'update'])->name('update');
+            Route::delete('/{kegiatanSekolah}',                    [KegiatanSekolahController::class, 'destroy'])->name('destroy');
+            Route::patch('/{kegiatanSekolah}/toggle-aktif',        [KegiatanSekolahController::class, 'toggleAktif'])->name('toggle-aktif');
         });
 
         // Pengguna

@@ -190,13 +190,14 @@
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center gap-6">
-            <a href="#beranda"    class="nav-link">Beranda</a>
-            <a href="#kegiatan"   class="nav-link">Kegiatan</a>
-            <a href="#prestasi"   class="nav-link">Prestasi</a>
-            <a href="#ekskul"     class="nav-link">Ekstrakurikuler</a>
-            <a href="#fasilitas"  class="nav-link">Fasilitas</a>
-            <a href="#informasi"  class="nav-link">Informasi</a>
-            <a href="#kontak"     class="nav-link">Kontak</a>
+            <a href="#beranda"      class="nav-link">Beranda</a>
+            <a href="#kegiatan"     class="nav-link">Kegiatan</a>
+            <a href="#prestasi"     class="nav-link">Prestasi</a>
+            <a href="#ekskul"       class="nav-link">Ekstrakurikuler</a>
+            <a href="#fasilitas"    class="nav-link">Fasilitas</a>
+            <a href="#pengumuman"   class="nav-link">Pengumuman</a>
+            <a href="#informasi"    class="nav-link">Informasi</a>
+            <a href="#kontak"       class="nav-link">Kontak</a>
         </div>
 
         <!-- Auth + Hamburger -->
@@ -222,13 +223,14 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden border-t border-gray-100 bg-white">
         <div class="px-4 py-3 flex flex-col gap-1">
-            <a href="#beranda"   class="nav-link py-2 block" onclick="closeMobileMenu()">Beranda</a>
-            <a href="#kegiatan"  class="nav-link py-2 block" onclick="closeMobileMenu()">Kegiatan</a>
-            <a href="#prestasi"  class="nav-link py-2 block" onclick="closeMobileMenu()">Prestasi</a>
-            <a href="#ekskul"    class="nav-link py-2 block" onclick="closeMobileMenu()">Ekstrakurikuler</a>
-            <a href="#fasilitas" class="nav-link py-2 block" onclick="closeMobileMenu()">Fasilitas</a>
-            <a href="#informasi" class="nav-link py-2 block" onclick="closeMobileMenu()">Informasi</a>
-            <a href="#kontak"    class="nav-link py-2 block" onclick="closeMobileMenu()">Kontak</a>
+            <a href="#beranda"    class="nav-link py-2 block" onclick="closeMobileMenu()">Beranda</a>
+            <a href="#kegiatan"   class="nav-link py-2 block" onclick="closeMobileMenu()">Kegiatan</a>
+            <a href="#prestasi"   class="nav-link py-2 block" onclick="closeMobileMenu()">Prestasi</a>
+            <a href="#ekskul"     class="nav-link py-2 block" onclick="closeMobileMenu()">Ekstrakurikuler</a>
+            <a href="#fasilitas"  class="nav-link py-2 block" onclick="closeMobileMenu()">Fasilitas</a>
+            <a href="#pengumuman" class="nav-link py-2 block" onclick="closeMobileMenu()">Pengumuman</a>
+            <a href="#informasi"  class="nav-link py-2 block" onclick="closeMobileMenu()">Informasi</a>
+            <a href="#kontak"     class="nav-link py-2 block" onclick="closeMobileMenu()">Kontak</a>
             @if (Route::has('login'))
                 @guest
                     <div class="pt-2 pb-1 flex flex-col gap-2">
@@ -318,7 +320,7 @@
               style="background:var(--gold); color:#fff;">📢 INFO</span>
         <div class="overflow-hidden flex-1">
             <p class="text-sm text-white whitespace-nowrap animate-marquee">
-                🎓 PPDB 2025/2026 telah dibuka — daftarkan segera &nbsp;|&nbsp;
+                🎓 PPDB {{ $tahunAjaran }} telah dibuka — daftarkan segera &nbsp;|&nbsp;
                 🏆 Tim Olimpiade Sains meraih Juara 1 Tingkat Provinsi &nbsp;|&nbsp;
                 📚 Ujian Akhir Semester Genap: 10–20 Juni 2025 &nbsp;|&nbsp;
                 🌿 SMK Muhammadiyah Sempor raih penghargaan Sekolah Adiwiyata &nbsp;|&nbsp;
@@ -548,8 +550,8 @@
                  'Tim LKS Teknik Komputer Lolos ke Babak Final Nasional',
                  'Tim LKS SMK Muhammadiyah Sempor berhasil melewati babak penyisihan dan siap bertarung di final...'],
                 ['Kegiatan','15 Mei 2025',
-                 'PPDB 2025/2026 Resmi Dibuka, Ini Jadwal dan Syaratnya',
-                 'Penerimaan Peserta Didik Baru tahun ajaran 2025/2026 resmi dibuka. Pendaftaran dapat dilakukan secara online...'],
+                 'PPDB ' . $tahunAjaran . ' Resmi Dibuka, Ini Jadwal dan Syaratnya',
+                 'Penerimaan Peserta Didik Baru tahun ajaran ' . $tahunAjaran . ' resmi dibuka. Pendaftaran dapat dilakukan secara online...'],
             ];
             @endphp
             @foreach($berita as [$kat,$tanggal,$judul,$desk])
@@ -573,6 +575,151 @@
                 </div>
             </div>
             @endforeach
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════ PENGUMUMAN SISWA DITERIMA ═══════════ -->
+<section id="pengumuman" class="py-20 px-4" style="background:#F0F7F9;">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <span class="sec-label">PPDB {{ $tahunAjaran }}</span>
+            <h2 class="text-3xl font-extrabold sec-title mt-1">Siswa Diterima</h2>
+            <div class="sec-divider mx-auto"></div>
+            <p class="text-gray-500 max-w-xl mx-auto text-sm">
+                Bagi pendaftar yang belum melakukan daftar ulang, harap segera melakukan daftar ulang.
+            </p>
+        </div>
+
+        {{-- Toolbar: per-page + search --}}
+        <form method="GET" action="{{ url('/') }}#pengumuman"
+              class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+
+            {{-- Per-page --}}
+            <div class="flex items-center gap-2">
+                <select name="per_page" onchange="this.form.submit()"
+                        class="text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white text-slate-700 font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer">
+                    @foreach([25, 50, 100, 1000] as $n)
+                        <option value="{{ $n }}" {{ request('per_page', 25) == $n ? 'selected' : '' }}>{{ $n }}</option>
+                    @endforeach
+                </select>
+                @if(request('q'))
+                    <input type="hidden" name="q" value="{{ request('q') }}">
+                @endif
+            </div>
+
+            {{-- Search --}}
+            <div class="relative w-full sm:w-64">
+                <input type="text" name="q" value="{{ request('q') }}"
+                       placeholder="Cari nama / NISN…"
+                       class="w-full text-sm border border-slate-200 rounded-xl pl-9 pr-4 py-2 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+                <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                </svg>
+                @if(request('per_page'))
+                    <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+                @endif
+            </div>
+        </form>
+
+        {{-- Tabel --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            @if($diterima->isEmpty())
+                <div class="p-16 text-center">
+                    <div class="text-5xl mb-4">🎓</div>
+                    @if(request('q'))
+                        <p class="text-slate-500 font-medium">Tidak ada hasil untuk "<strong>{{ request('q') }}</strong>".</p>
+                        <a href="{{ url('/') }}#pengumuman" class="mt-3 inline-block text-sm font-semibold"
+                           style="color:var(--teal);">Tampilkan semua →</a>
+                    @else
+                        <p class="text-slate-500 font-medium">Belum ada pengumuman siswa diterima.</p>
+                    @endif
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50/60">
+                                <th class="px-5 py-3.5 text-left font-semibold text-slate-500 uppercase tracking-wide text-xs">Nama</th>
+                                <th class="px-5 py-3.5 text-left font-semibold text-slate-500 uppercase tracking-wide text-xs">Nomor Pendaftaran</th>
+                                <th class="px-5 py-3.5 text-left font-semibold text-slate-500 uppercase tracking-wide text-xs">Asal Sekolah</th>
+                                <th class="px-5 py-3.5 text-left font-semibold text-slate-500 uppercase tracking-wide text-xs">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @foreach($diterima as $siswa)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="px-5 py-3.5 font-medium text-slate-800">
+                                    {{ $siswa->nama_lengkap }}
+                                </td>
+                                <td class="px-5 py-3.5 text-slate-500 font-mono tracking-wide">
+                                    {{-- Sensor 4 digit pertama NISN, tampilkan **** + 7 digit terakhir --}}
+                                    @php
+                                        $nisn = $siswa->nisn ?? '';
+                                        $masked = strlen($nisn) > 7
+                                            ? '****' . substr($nisn, -7)
+                                            : str_repeat('*', max(0, strlen($nisn) - 3)) . substr($nisn, -3);
+                                    @endphp
+                                    {{ $masked ?: '—' }}
+                                </td>
+                                <td class="px-5 py-3.5 text-slate-600">
+                                    {{ $siswa->asal_sekolah ?: '—' }}
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                                        ✓ Diterima
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Pagination --}}
+                @if($diterima->hasPages())
+                <div class="px-5 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
+                    <span>
+                        Menampilkan {{ $diterima->firstItem() }}–{{ $diterima->lastItem() }}
+                        dari <strong>{{ $diterima->total() }}</strong> siswa diterima
+                    </span>
+                    <div class="flex items-center gap-1">
+                        {{-- Previous --}}
+                        @if($diterima->onFirstPage())
+                            <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-300 cursor-not-allowed select-none">‹</span>
+                        @else
+                            <a href="{{ $diterima->previousPageUrl() }}#pengumuman"
+                               class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-teal-50 text-slate-600 hover:text-teal-700 transition font-semibold">‹</a>
+                        @endif
+
+                        {{-- Page numbers --}}
+                        @foreach($diterima->getUrlRange(max(1, $diterima->currentPage()-2), min($diterima->lastPage(), $diterima->currentPage()+2)) as $page => $url)
+                            @if($page == $diterima->currentPage())
+                                <span class="px-3 py-1.5 rounded-lg text-white font-bold text-xs"
+                                      style="background:var(--teal);">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}#pengumuman"
+                                   class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-teal-50 text-slate-600 hover:text-teal-700 transition text-xs font-semibold">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        {{-- Next --}}
+                        @if($diterima->hasMorePages())
+                            <a href="{{ $diterima->nextPageUrl() }}#pengumuman"
+                               class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-teal-50 text-slate-600 hover:text-teal-700 transition font-semibold">›</a>
+                        @else
+                            <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-300 cursor-not-allowed select-none">›</span>
+                        @endif
+                    </div>
+                </div>
+                @else
+                <div class="px-5 py-4 border-t border-slate-100 text-sm text-slate-500">
+                    Total <strong>{{ $diterima->total() }}</strong> siswa diterima
+                </div>
+                @endif
+            @endif
         </div>
     </div>
 </section>
@@ -737,7 +884,7 @@
             <div class="flex items-center gap-5 relative z-10">
                 <img src="{{ asset('image/smk.png') }}" alt="Logo" class="w-16 h-16 object-contain rounded-2xl bg-white/90 p-1.5 shrink-0">
                 <div class="text-white">
-                    <p class="text-sm font-semibold opacity-80 mb-0.5">Tahun Ajaran 2025/2026 — Kuota Terbatas!</p>
+                    <p class="text-sm font-semibold opacity-80 mb-0.5">Tahun Ajaran {{ $tahunAjaran }} — Kuota Terbatas!</p>
                     <h3 class="text-xl font-black">Daftar Sekarang di</h3>
                     <p class="text-lg font-extrabold" style="color:#F9C940;">SMK Muhammadiyah Sempor</p>
                 </div>

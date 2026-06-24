@@ -203,6 +203,12 @@
             <span class="sidebar-label">Informasi</span>
         </a>
 
+        <a href="{{ route('admin.kegiatan-sekolah.index') }}" data-spa
+           class="nav-item" data-route="admin.kegiatan-sekolah.index">
+            <span class="icon">🎉</span>
+            <span class="sidebar-label">Kegiatan Sekolah</span>
+        </a>
+
         <!-- ── Sistem ── -->
         <p class="sidebar-group-label text-xs font-bold uppercase tracking-widest text-white/30 px-3 pt-4 pb-1">
             Sistem
