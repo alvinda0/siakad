@@ -168,7 +168,6 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
 const routes = @json(
     collect($guru->items())->mapWithKeys(fn($u) => [
@@ -178,7 +177,13 @@ const routes = @json(
 
 function openWaliModal(userId, userName, currentKelasId) {
     document.getElementById('modal-guru-name').textContent = userName;
-    document.getElementById('wali-form').action = routes[userId];
+
+    const actionUrl = routes[userId] ?? null;
+    if (!actionUrl) {
+        alert('Gagal memuat URL aksi. Silakan refresh halaman.');
+        return;
+    }
+    document.getElementById('wali-form').action = actionUrl;
 
     const sel = document.getElementById('wali-kelas-select');
     sel.value = currentKelasId ?? '';
@@ -213,5 +218,5 @@ document.getElementById('wali-kelas-select').addEventListener('change', checkWal
 // Tutup modal klik backdrop
 document.getElementById('wali-modal').addEventListener('click', closeWaliModal);
 </script>
-@endpush
+
 @endsection

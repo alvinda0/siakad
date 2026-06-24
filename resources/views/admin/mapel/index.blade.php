@@ -142,7 +142,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <button type="button"
                                             data-id="{{ $item->id }}"
-                                            data-mapel='{!! json_encode($item->only(["kode", "nama", "guru_id", "jurusan", "tingkat", "deskripsi", "aktif"]), JSON_UNESCAPED_UNICODE) !!}'
+                                            data-mapel="{{ json_encode($item->only(['kode', 'nama', 'guru_id', 'jurusan', 'tingkat', 'deskripsi', 'aktif']), JSON_HEX_QUOT | JSON_HEX_TAG | JSON_UNESCAPED_UNICODE) }}"
                                             onclick="openEditModal(this.dataset.id, JSON.parse(this.dataset.mapel))"
                                             class="text-xs px-3 py-1.5 rounded-lg font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
                                         Edit
@@ -383,19 +383,19 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
+(function() {
 const editRoutes = @json(collect($mapel->items())->mapWithKeys(fn($item) => [$item->id => route('admin.mapel.update', $item)]));
 
-function openCreateModal() {
+window.openCreateModal = function() {
     document.getElementById('modal-create').classList.remove('hidden');
 }
 
-function closeCreateModal() {
+window.closeCreateModal = function() {
     document.getElementById('modal-create').classList.add('hidden');
 }
 
-function openEditModal(id, data) {
+window.openEditModal = function(id, data) {
     const form = document.getElementById('form-edit');
     form.action = editRoutes[id] ?? form.action;
     form.querySelector('input[name="edit_id"]').value = id;
@@ -413,23 +413,28 @@ function openEditModal(id, data) {
     document.getElementById('modal-edit').classList.remove('hidden');
 }
 
-function closeEditModal() {
+window.closeEditModal = function() {
     document.getElementById('modal-edit').classList.add('hidden');
 }
 
-function confirmDelete(url, message) {
-    if (!confirm(message)) {
+window.confirmDeleteModal = function(url, name) {
+    if (!confirm('Hapus mata pelajaran "' + name + '"?\nTindakan ini tidak dapat dibatalkan.')) {
         return;
     }
 
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = url;
-    form.innerHTML = `@csrf @method('DELETE')`;
+    form.innerHTML = `
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="_method" value="DELETE">
+    `;
     document.body.appendChild(form);
     form.submit();
-}@if(old('_form') === 'create')
-    document.addEventListener('DOMContentLoaded', openCreateModal);
+}
+
+@if(old('_form') === 'create')
+    openCreateModal();
 @endif
 
 @php
@@ -448,10 +453,10 @@ function confirmDelete(url, message) {
 @endphp
 
 @if($editItem)
-    document.addEventListener('DOMContentLoaded', function () {
-        openEditModal({{ (int) old('edit_id') }}, @json($editItem));
-    });
+    openEditModal({{ (int) old('edit_id') }}, @json($editItem));
 @endif
+
+})();
 </script>
-@endpush
+
 @endsection

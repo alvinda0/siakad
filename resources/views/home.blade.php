@@ -190,12 +190,13 @@
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center gap-6">
-            <a href="#beranda"   class="nav-link">Beranda</a>
-            <a href="#kegiatan"  class="nav-link">Kegiatan</a>
-            <a href="#prestasi"  class="nav-link">Prestasi</a>
-            <a href="#ekskul"    class="nav-link">Ekstrakurikuler</a>
-            <a href="#fasilitas" class="nav-link">Fasilitas</a>
-            <a href="#kontak"    class="nav-link">Kontak</a>
+            <a href="#beranda"    class="nav-link">Beranda</a>
+            <a href="#kegiatan"   class="nav-link">Kegiatan</a>
+            <a href="#prestasi"   class="nav-link">Prestasi</a>
+            <a href="#ekskul"     class="nav-link">Ekstrakurikuler</a>
+            <a href="#fasilitas"  class="nav-link">Fasilitas</a>
+            <a href="#informasi"  class="nav-link">Informasi</a>
+            <a href="#kontak"     class="nav-link">Kontak</a>
         </div>
 
         <!-- Auth + Hamburger -->
@@ -226,6 +227,7 @@
             <a href="#prestasi"  class="nav-link py-2 block" onclick="closeMobileMenu()">Prestasi</a>
             <a href="#ekskul"    class="nav-link py-2 block" onclick="closeMobileMenu()">Ekstrakurikuler</a>
             <a href="#fasilitas" class="nav-link py-2 block" onclick="closeMobileMenu()">Fasilitas</a>
+            <a href="#informasi" class="nav-link py-2 block" onclick="closeMobileMenu()">Informasi</a>
             <a href="#kontak"    class="nav-link py-2 block" onclick="closeMobileMenu()">Kontak</a>
             @if (Route::has('login'))
                 @guest
@@ -571,6 +573,103 @@
                 </div>
             </div>
             @endforeach
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════ INFORMASI ═══════════ -->
+<section id="informasi" class="py-20 px-4 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <span class="sec-label">Program & Beasiswa</span>
+            <h2 class="text-3xl font-extrabold sec-title mt-1">Informasi</h2>
+            <div class="sec-divider mx-auto"></div>
+            <p class="text-gray-500 max-w-xl mx-auto text-sm">Informasi beasiswa dan promo program strategis yang tersedia untuk calon dan siswa aktif.</p>
+        </div>
+
+        @php
+            use App\Models\Informasi;
+            $beasiswa = Informasi::aktif()->beasiswa()->orderBy('urutan')->orderBy('jenis')->get();
+            $promo    = Informasi::aktif()->promo()->orderBy('urutan')->orderBy('jenis')->get();
+        @endphp
+
+        <div class="space-y-10">
+
+            {{-- ── Informasi Beasiswa ── --}}
+            <div>
+                <h3 class="text-lg font-extrabold sec-title mb-4 flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm"
+                          style="background:var(--teal);">🎓</span>
+                    Informasi Beasiswa
+                </h3>
+                @if($beasiswa->isEmpty())
+                    <div class="bg-slate-50 rounded-2xl border border-slate-100 p-8 text-center text-sm text-slate-400">
+                        Belum ada informasi beasiswa saat ini.
+                    </div>
+                @else
+                    <div class="overflow-x-auto rounded-2xl border border-slate-100 shadow-sm">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr style="background:var(--teal);" class="text-white">
+                                    <th class="px-5 py-3 font-semibold text-left w-10">No</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Jenis Beasiswa</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Syarat</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Benefit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                @foreach($beasiswa as $i => $item)
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="px-5 py-3.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-800">{{ $item->jenis }}</td>
+                                    <td class="px-5 py-3.5 text-slate-500 whitespace-pre-line leading-relaxed">{{ $item->syarat ?: '-' }}</td>
+                                    <td class="px-5 py-3.5 text-slate-500 whitespace-pre-line leading-relaxed">{{ $item->benefit ?: '-' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+            {{-- ── Promo Program Strategis ── --}}
+            <div>
+                <h3 class="text-lg font-extrabold sec-title mb-4 flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm"
+                          style="background:var(--gold);">⭐</span>
+                    Promo Program Strategis
+                </h3>
+                @if($promo->isEmpty())
+                    <div class="bg-slate-50 rounded-2xl border border-slate-100 p-8 text-center text-sm text-slate-400">
+                        Belum ada informasi promo program saat ini.
+                    </div>
+                @else
+                    <div class="overflow-x-auto rounded-2xl border border-slate-100 shadow-sm">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr style="background:var(--gold);" class="text-white">
+                                    <th class="px-5 py-3 font-semibold text-left w-10">No</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Jenis Program</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Syarat</th>
+                                    <th class="px-5 py-3 font-semibold text-left">Benefit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 bg-white">
+                                @foreach($promo as $i => $item)
+                                <tr class="hover:bg-amber-50 transition">
+                                    <td class="px-5 py-3.5 text-slate-400 font-medium">{{ $i + 1 }}</td>
+                                    <td class="px-5 py-3.5 font-semibold text-slate-800">{{ $item->jenis }}</td>
+                                    <td class="px-5 py-3.5 text-slate-500 whitespace-pre-line leading-relaxed">{{ $item->syarat ?: '-' }}</td>
+                                    <td class="px-5 py-3.5 text-slate-500 whitespace-pre-line leading-relaxed">{{ $item->benefit ?: '-' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
         </div>
     </div>
 </section>

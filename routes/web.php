@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AbsensiController;
 use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Admin\InformasiController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MataPelajaranController;
@@ -116,6 +117,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/',        [NilaiController::class, 'index'])->name('index');
             Route::post('/simpan', [NilaiController::class, 'simpan'])->name('simpan');
             Route::get('/rekap',   [NilaiController::class, 'rekap'])->name('rekap');
+        });
+
+        // Informasi (Beasiswa & Promo Program Strategis)
+        Route::prefix('informasi')->name('informasi.')->group(function () {
+            Route::get('/',                                [InformasiController::class, 'index'])->name('index');
+            Route::post('/',                               [InformasiController::class, 'store'])->name('store');
+            Route::put('/{informasi}',                     [InformasiController::class, 'update'])->name('update');
+            Route::delete('/{informasi}',                  [InformasiController::class, 'destroy'])->name('destroy');
+            Route::patch('/{informasi}/toggle-aktif',      [InformasiController::class, 'toggleAktif'])->name('toggle-aktif');
         });
 
         // Pengguna

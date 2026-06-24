@@ -361,7 +361,6 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
 const editJadwalRoutes = @json($jadwal->mapWithKeys(fn($item) => [$item->id => route('admin.jadwal.update', $item)]));
 
@@ -426,5 +425,5 @@ function confirmDelete(url, message) {
     });
 @endif
 </script>
-@endpush
+
 @endsection

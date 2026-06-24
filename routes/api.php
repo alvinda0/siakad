@@ -24,11 +24,14 @@ Route::prefix('auth')->group(function () {
 
 // ── Publik: Info sekolah ─────────────────────────────────────────────────
 Route::prefix('info')->group(function () {
-    Route::get('sekolah',  [InfoController::class, 'sekolah']);
-    Route::get('kegiatan', [InfoController::class, 'kegiatan']);
-    Route::get('prestasi', [InfoController::class, 'prestasi']);
-    Route::get('ekskul',   [InfoController::class, 'ekskul']);
-    Route::get('berita',   [InfoController::class, 'berita']);
+    Route::get('sekolah',    [InfoController::class, 'sekolah']);
+    Route::get('kegiatan',   [InfoController::class, 'kegiatan']);
+    Route::get('prestasi',   [InfoController::class, 'prestasi']);
+    Route::get('ekskul',     [InfoController::class, 'ekskul']);
+    Route::get('berita',     [InfoController::class, 'berita']);
+    Route::get('informasi',  [InfoController::class, 'informasi']);
+    Route::get('beasiswa',   [InfoController::class, 'beasiswa']);
+    Route::get('promo',      [InfoController::class, 'promo']);
 });
 
 // ── Protected: butuh token Sanctum ───────────────────────────────────────

@@ -826,7 +826,6 @@
     </div>{{-- /flex --}}
 </div>{{-- /space-y-5 --}}
 
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
 /* ── Choices.js — inisialisasi semua <select> (sama dengan halaman /daftar) ── */
@@ -904,5 +903,5 @@ function tambahPrestasi() {
     document.getElementById('prestasi-list').appendChild(div);
 }
 </script>
-@endpush
+
 @endsection

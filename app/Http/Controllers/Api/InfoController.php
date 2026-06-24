@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Informasi;
 use Illuminate\Http\JsonResponse;
 
 /**
  * Endpoint publik — konten statis profil sekolah.
- * Nanti bisa diganti ambil dari DB kalau sudah ada tabel-nya.
  */
 class InfoController extends Controller
 {
@@ -215,6 +215,72 @@ class InfoController extends Controller
         return response()->json([
             'data'  => $berita,
             'total' => count($berita),
+        ]);
+    }
+
+    // ── Informasi dari Database ───────────────────────────────────────────────
+
+    /**
+     * Semua informasi aktif (beasiswa + promo), dikelompokkan per tipe.
+     * GET /api/info/informasi
+     */
+    public function informasi(): JsonResponse
+    {
+        $data = Informasi::aktif()
+            ->orderBy('tipe')
+            ->orderBy('urutan')
+            ->orderBy('jenis')
+            ->get(['id', 'tipe', 'jenis', 'syarat', 'benefit', 'urutan']);
+
+        $grouped = $data->groupBy('tipe')->map(fn($items, $tipe) => [
+            'tipe'   => $tipe,
+            'label'  => Informasi::$tipe[$tipe] ?? $tipe,
+            'data'   => $items->values(),
+        ])->values();
+
+        return response()->json([
+            'data'  => $grouped,
+            'total' => $data->count(),
+        ]);
+    }
+
+    /**
+     * Hanya informasi beasiswa aktif.
+     * GET /api/info/beasiswa
+     */
+    public function beasiswa(): JsonResponse
+    {
+        $data = Informasi::aktif()
+            ->beasiswa()
+            ->orderBy('urutan')
+            ->orderBy('jenis')
+            ->get(['id', 'tipe', 'jenis', 'syarat', 'benefit', 'urutan']);
+
+        return response()->json([
+            'tipe'  => 'beasiswa',
+            'label' => 'Informasi Beasiswa',
+            'data'  => $data,
+            'total' => $data->count(),
+        ]);
+    }
+
+    /**
+     * Hanya promo program strategis aktif.
+     * GET /api/info/promo
+     */
+    public function promo(): JsonResponse
+    {
+        $data = Informasi::aktif()
+            ->promo()
+            ->orderBy('urutan')
+            ->orderBy('jenis')
+            ->get(['id', 'tipe', 'jenis', 'syarat', 'benefit', 'urutan']);
+
+        return response()->json([
+            'tipe'  => 'promo',
+            'label' => 'Promo Program Strategis',
+            'data'  => $data,
+            'total' => $data->count(),
         ]);
     }
 }

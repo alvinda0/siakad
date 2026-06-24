@@ -199,7 +199,6 @@
 
 </div>
 
-@push('scripts')
 <script>
 // Live preview nilai akhir & predikat
 function hitungAkhir(row) {
@@ -241,5 +240,5 @@ document.addEventListener('input', function (e) {
     }
 });
 </script>
-@endpush
+
 @endsection

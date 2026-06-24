@@ -52,13 +52,20 @@ class GuruController extends Controller
 
         $kelasId = $data['kelas_id'] ?: null;
 
-        // Lepas kelas lama yang dipegangnya (jika berbeda)
+        // Lepas semua kelas yang sebelumnya dipegang guru ini
         Kelas::where('wali_kelas_id', $user->id)
-             ->where('id', '!=', $kelasId ?? 0)
              ->update(['wali_kelas_id' => null, 'wali_kelas' => null]);
 
         if ($kelasId) {
             $kelas = Kelas::findOrFail($kelasId);
+
+            // Lepas wali lama di kelas yang dipilih (jika dipegang guru lain)
+            if ($kelas->wali_kelas_id && $kelas->wali_kelas_id !== $user->id) {
+                Kelas::where('wali_kelas_id', $kelas->wali_kelas_id)
+                     ->where('id', $kelasId)
+                     ->update(['wali_kelas_id' => null, 'wali_kelas' => null]);
+            }
+
             $kelas->update([
                 'wali_kelas_id' => $user->id,
                 'wali_kelas'    => $user->name,

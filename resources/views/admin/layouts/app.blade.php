@@ -197,6 +197,12 @@
             <span class="sidebar-label">Nilai</span>
         </a>
 
+        <a href="{{ route('admin.informasi.index') }}" data-spa
+           class="nav-item" data-route="admin.informasi.index">
+            <span class="icon">📢</span>
+            <span class="sidebar-label">Informasi</span>
+        </a>
+
         <!-- ── Sistem ── -->
         <p class="sidebar-group-label text-xs font-bold uppercase tracking-widest text-white/30 px-3 pt-4 pb-1">
             Sistem
@@ -310,6 +316,26 @@ function progressDone() {
     }, 200);
 }
 
+/* ── Re-run scripts after SPA swap ── */
+function rerunScripts(container) {
+    const scripts = Array.from(container.querySelectorAll('script'));
+    return scripts.reduce((chain, old) => {
+        return chain.then(() => new Promise((resolve) => {
+            const s = document.createElement('script');
+            Array.from(old.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
+            if (old.src) {
+                // External script — wait for load before continuing
+                s.onload  = resolve;
+                s.onerror = resolve; // Don't block chain on error
+            } else {
+                s.textContent = old.textContent;
+            }
+            old.replaceWith(s);
+            if (!old.src) resolve(); // Inline scripts execute synchronously
+        }));
+    }, Promise.resolve());
+}
+
 /* ── Navigate ── */
 async function navigateTo(url, pushState = true) {
     progressStart();
@@ -345,12 +371,14 @@ async function navigateTo(url, pushState = true) {
             history.pushState({ url }, '', url);
         }
 
+        // Clear any page-specific global functions from the previous page
+        // to prevent stale closures from interfering with new page scripts
+        ['openEditModal','closeEditModal','openCreateModal','closeCreateModal',
+         'confirmDeleteModal','confirmDelete','openWaliModal','closeWaliModal',
+         'openDeleteModal','closeDeleteModal'].forEach(fn => { delete window[fn]; });
+
         // Re-run any inline scripts inside the new content
-        pageContent.querySelectorAll('script').forEach(old => {
-            const s = document.createElement('script');
-            s.textContent = old.textContent;
-            old.replaceWith(s);
-        });
+        await rerunScripts(pageContent);
 
         updateActiveNav(url);
 

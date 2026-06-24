@@ -480,7 +480,6 @@
     </div>
 </div>
 
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
 /* ── Choices.js instances ── */
@@ -563,8 +562,12 @@ function closeEditModal() {
     document.getElementById('edit-keterangan').value   = @json(old('keterangan', ''));
     // Restore action from hidden field
     const editId = @json(old('_edit_id', ''));
-    if (editId) document.getElementById('form-edit').action = kelasRouteBase + '/' + editId;
-    openEditModal(editId, {});
+    if (editId) {
+        // Jangan panggil openEditModal(editId, {}) karena akan menimpa nilai yang sudah diisi
+        document.getElementById('form-edit').action = kelasRouteBase + '/' + editId;
+        document.getElementById('modal-edit').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 @endif
 
 /* ── Delete confirm ── */
@@ -590,5 +593,5 @@ document.addEventListener('keydown', e => {
     }
 });
 </script>
-@endpush
+
 @endsection
