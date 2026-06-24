@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ekstrakurikuler;
 use App\Models\Informasi;
 use Illuminate\Http\JsonResponse;
 

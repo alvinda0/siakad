@@ -256,6 +256,7 @@
 </div>
 @endsection
 
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
 (function () {
@@ -269,10 +270,10 @@
         allowHTML: false,
     };
 
-    // Aksi — sedikit opsi, search tetap aktif tapi bisa dinonaktifkan
+    // Aksi — sedikit opsi, search tidak perlu
     new Choices(document.getElementById('filter-action'), {
         ...commonOpts,
-        searchEnabled: false,   // cukup 5 opsi, tidak perlu search
+        searchEnabled: false,
     });
 
     // Model
@@ -290,5 +291,4 @@
     });
 })();
 </script>
-
-@endsection
+@endpush

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AbsensiController;
+use App\Http\Controllers\Admin\EkstrakurikulerController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\InformasiController;
 use App\Http\Controllers\Admin\JadwalController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\MuridController;
 use App\Http\Controllers\Admin\NilaiController;
 use App\Http\Controllers\Admin\KandidatController;
+use App\Http\Controllers\Admin\PrestasiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicController;
@@ -142,6 +144,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/{informasi}/toggle-aktif',      [InformasiController::class, 'toggleAktif'])->name('toggle-aktif');
         });
 
+        // Prestasi
+        Route::prefix('prestasi')->name('prestasi.')->group(function () {
+            Route::get('/',                              [PrestasiController::class, 'index'])->name('index');
+            Route::post('/',                             [PrestasiController::class, 'store'])->name('store');
+            Route::put('/{prestasi}',                    [PrestasiController::class, 'update'])->name('update');
+            Route::delete('/{prestasi}',                 [PrestasiController::class, 'destroy'])->name('destroy');
+            Route::patch('/{prestasi}/toggle-aktif',     [PrestasiController::class, 'toggleAktif'])->name('toggle-aktif');
+        });
+
         // Kegiatan Sekolah
         Route::prefix('kegiatan-sekolah')->name('kegiatan-sekolah.')->group(function () {
             Route::get('/',                                        [KegiatanSekolahController::class, 'index'])->name('index');
@@ -149,6 +160,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{kegiatanSekolah}',                       [KegiatanSekolahController::class, 'update'])->name('update');
             Route::delete('/{kegiatanSekolah}',                    [KegiatanSekolahController::class, 'destroy'])->name('destroy');
             Route::patch('/{kegiatanSekolah}/toggle-aktif',        [KegiatanSekolahController::class, 'toggleAktif'])->name('toggle-aktif');
+        });
+
+        // Ekstrakurikuler
+        Route::prefix('ekstrakurikuler')->name('ekstrakurikuler.')->group(function () {
+            Route::get('/',                                            [EkstrakurikulerController::class, 'index'])->name('index');
+            Route::post('/',                                           [EkstrakurikulerController::class, 'store'])->name('store');
+            Route::put('/{ekstrakurikuler}',                           [EkstrakurikulerController::class, 'update'])->name('update');
+            Route::delete('/{ekstrakurikuler}',                        [EkstrakurikulerController::class, 'destroy'])->name('destroy');
+            Route::patch('/{ekstrakurikuler}/toggle-aktif',            [EkstrakurikulerController::class, 'toggleAktif'])->name('toggle-aktif');
         });
 
         // Pengguna

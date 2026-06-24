@@ -32,7 +32,7 @@ class ActivityLogController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 25;
+        $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
         $logs = $query->paginate($perPage)->withQueryString();
 
         // Untuk dropdown filter user

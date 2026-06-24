@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Informasi;
 use App\Models\KandidatProfile;
 use App\Models\KegiatanSekolah;
+use App\Models\Prestasi;
+use App\Models\Ekstrakurikuler;
 use Illuminate\Http\Request;
 
 class PublicController extends Controller
@@ -25,7 +27,22 @@ class PublicController extends Controller
      */
     public function prestasi()
     {
-        return view('pages.prestasi');
+        $prestasi = Prestasi::aktif()
+            ->orderBy('urutan')
+            ->orderByDesc('tahun')
+            ->orderBy('judul')
+            ->get();
+
+        $stats = [
+            'total'     => Prestasi::aktif()->count(),
+            'nasional'  => Prestasi::aktif()->tingkat('Nasional')->count(),
+            'provinsi'  => Prestasi::aktif()->tingkat('Provinsi')->count(),
+            'kabupaten' => Prestasi::aktif()->tingkat('Kabupaten')->count(),
+            'kecamatan' => Prestasi::aktif()->tingkat('Kecamatan')->count(),
+            'desa'      => Prestasi::aktif()->tingkat('Desa')->count(),
+        ];
+
+        return view('pages.prestasi', compact('prestasi', 'stats'));
     }
 
     /**
@@ -33,7 +50,10 @@ class PublicController extends Controller
      */
     public function ekstrakurikuler()
     {
-        return view('pages.ekstrakurikuler');
+        $wajib   = Ekstrakurikuler::aktif()->jenis('Wajib')->orderBy('urutan')->orderBy('nama')->get();
+        $pilihan = Ekstrakurikuler::aktif()->jenis('Pilihan')->orderBy('urutan')->orderBy('nama')->get();
+
+        return view('pages.ekstrakurikuler', compact('wajib', 'pilihan'));
     }
 
     /**

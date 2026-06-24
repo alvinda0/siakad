@@ -209,6 +209,18 @@
             <span class="sidebar-label">Kegiatan Sekolah</span>
         </a>
 
+        <a href="{{ route('admin.prestasi.index') }}" data-spa
+           class="nav-item" data-route="admin.prestasi.index">
+            <span class="icon">🏆</span>
+            <span class="sidebar-label">Prestasi</span>
+        </a>
+
+        <a href="{{ route('admin.ekstrakurikuler.index') }}" data-spa
+           class="nav-item" data-route="admin.ekstrakurikuler.index">
+            <span class="icon">🏅</span>
+            <span class="sidebar-label">Ekstrakurikuler</span>
+        </a>
+
         <!-- ── Sistem ── -->
         <p class="sidebar-group-label text-xs font-bold uppercase tracking-widest text-white/30 px-3 pt-4 pb-1">
             Sistem
