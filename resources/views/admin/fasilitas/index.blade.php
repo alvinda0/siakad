@@ -397,7 +397,6 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
 (function () {
     const editRoutes = @json(collect($fasilitas->items())->mapWithKeys(fn($item) => [$item->id => route('admin.fasilitas.update', $item)]));
@@ -503,6 +502,5 @@
     @endif
 })();
 </script>
-@endpush
 
 @endsection

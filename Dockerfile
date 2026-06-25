@@ -1,84 +1,81 @@
-# ─────────────────────────────────────────
-# Stage 1: Build frontend assets (Vite)
-# ─────────────────────────────────────────
+# =========================
+# Stage 1: Build Vite Assets
+# =========================
 FROM node:22-alpine AS frontend
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci --ignore-scripts
+COPY package*.json ./
+RUN npm ci
 
 COPY . .
+
 RUN npm run build
 
-# ─────────────────────────────────────────
-# Stage 2: PHP-FPM application
-# ─────────────────────────────────────────
-FROM php:8.3-fpm-alpine AS app
+# =========================
+# Stage 2: Laravel App
+# =========================
+FROM php:8.3-cli-alpine
 
-# Install system dependencies
+# System dependencies
 RUN apk add --no-cache \
+    git \
+    curl \
+    unzip \
+    zip \
+    oniguruma-dev \
+    icu-dev \
     postgresql-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     libwebp-dev \
-    freetype-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    oniguruma-dev \
-    icu-dev \
-    && docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-        --with-webp \
-    && docker-php-ext-install \
-        pdo \
-        pdo_pgsql \
-        pgsql \
-        gd \
-        bcmath \
-        mbstring \
-        intl \
-        opcache \
-        pcntl
+    freetype-dev
 
-# Install Composer
+# PHP Extensions
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+    --with-webp
+
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    pgsql \
+    mbstring \
+    bcmath \
+    intl \
+    gd
+
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first (layer caching)
+# Install PHP dependencies
 COPY composer.json composer.lock ./
+
 RUN composer install \
     --no-dev \
-    --no-interaction \
-    --no-scripts \
-    --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-interaction
 
-# Copy application source
+# Copy source code
 COPY . .
 
-# Copy built frontend assets from stage 1
+# Copy Vite build result
 COPY --from=frontend /app/public/build ./public/build
 
-# Custom php.ini
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-app.ini
+# Permissions
+RUN mkdir -p storage/logs bootstrap/cache
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
-# Run post-install scripts
-RUN composer run-script post-autoload-dump || true
+# Expose Render Port
+EXPOSE 10000
 
-# Entrypoint
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-EXPOSE 9000
-
-ENTRYPOINT ["/entrypoint.sh"]
+# Start Laravel
+CMD php artisan migrate --force && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache && \
+    php artisan serve --host=0.0.0.0 --port=${PORT:-10000}

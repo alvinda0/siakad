@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\JadwalSeeder;
+use Database\Seeders\JadwalUjianSeeder;
 use Database\Seeders\KelasSeeder;
 use Database\Seeders\MataPelajaranSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -62,7 +64,13 @@ class DatabaseSeeder extends Seeder
         // 3. Seed mata pelajaran
         $this->call(MataPelajaranSeeder::class);
 
-        // 2. Buat satu user untuk setiap role
+        // 4. Seed jadwal pelajaran
+        $this->call(JadwalSeeder::class);
+
+        // 5. Seed jadwal ujian
+        $this->call(JadwalUjianSeeder::class);
+
+        // 6. Buat satu user untuk setiap role
         $rows = [];
 
         foreach ($this->defaultUsers as $data) {

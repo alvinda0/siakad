@@ -1,6 +1,9 @@
 @extends('admin.layouts.app')
 
-@push('styles')
+@section('title', 'Daftar Kelas')
+@section('breadcrumb', 'Kelas')
+
+@section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 <style>
     /* ── Choices.js overrides untuk modal kelas ── */
@@ -42,12 +45,6 @@
         padding: .4rem .75rem !important;
     }
 </style>
-@endpush
-
-@section('title', 'Daftar Kelas')
-@section('breadcrumb', 'Kelas')
-
-@section('content')
 <div class="space-y-5">
 
     {{-- Header --}}

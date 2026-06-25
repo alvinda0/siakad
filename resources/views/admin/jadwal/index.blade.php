@@ -379,7 +379,6 @@ function openEditModal(id, data) {
         document.getElementById('edit-mata_pelajaran_id').value = data.mata_pelajaran_id ?? '';
         document.getElementById('edit-guru_id').value           = data.guru_id ?? '';
         document.getElementById('edit-hari').value              = data.hari ?? '';
-        // Time values: trim seconds if present
         document.getElementById('edit-jam_mulai').value   = (data.jam_mulai   ?? '').substring(0, 5);
         document.getElementById('edit-jam_selesai').value = (data.jam_selesai ?? '').substring(0, 5);
         document.getElementById('edit-ruangan').value     = data.ruangan ?? '';
@@ -395,7 +394,8 @@ function confirmDelete(url, message) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = url;
-    form.innerHTML = `@csrf @method('DELETE')`;
+    form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="_method" value="DELETE">`;
     document.body.appendChild(form);
     form.submit();
 }

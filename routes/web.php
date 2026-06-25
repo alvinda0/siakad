@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\FasilitasController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\InformasiController;
 use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\JadwalUjianController;
 use App\Http\Controllers\Admin\KegiatanSekolahController;
 use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MataPelajaranController;
@@ -15,8 +16,13 @@ use App\Http\Controllers\Admin\MuridController;
 use App\Http\Controllers\Admin\NilaiController;
 use App\Http\Controllers\Admin\KandidatController;
 use App\Http\Controllers\Admin\PrestasiController;
+use App\Http\Controllers\Admin\SoalUjianController;
 use App\Http\Controllers\Admin\TickerController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\JawabanUjianController;
+use App\Http\Controllers\Guru\JadwalUjianGuruController;
+use App\Http\Controllers\Guru\JawabanUjianGuruController;
+use App\Http\Controllers\Murid\UjianController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
@@ -123,6 +129,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{jadwal}',     [JadwalController::class, 'destroy'])->name('destroy');
         });
 
+        // Jadwal Ujian
+        Route::prefix('jadwal-ujian')->name('jadwal-ujian.')->group(function () {
+            Route::get('/',                                [JadwalUjianController::class, 'index'])->name('index');
+            Route::post('/',                               [JadwalUjianController::class, 'store'])->name('store');
+            Route::put('/{jadwalUjian}',                   [JadwalUjianController::class, 'update'])->name('update');
+            Route::delete('/{jadwalUjian}',                [JadwalUjianController::class, 'destroy'])->name('destroy');
+            Route::patch('/{jadwalUjian}/toggle-aktif',    [JadwalUjianController::class, 'toggleAktif'])->name('toggle-aktif');
+            Route::post('/{jadwalUjian}/upload-soal',      [JadwalUjianController::class, 'uploadSoal'])->name('upload-soal');
+            Route::delete('/{jadwalUjian}/hapus-soal',     [JadwalUjianController::class, 'hapusSoal'])->name('hapus-soal');
+            Route::post('/{jadwalUjian}/upload-kunci',     [JadwalUjianController::class, 'uploadKunci'])->name('upload-kunci');
+        });
+
+        // Soal Ujian (manajemen soal per jadwal ujian)
+        Route::prefix('jadwal-ujian/{jadwalUjian}/soal')->name('soal-ujian.')->group(function () {
+            Route::get('/',              [SoalUjianController::class, 'index'])->name('index');
+            Route::post('/',             [SoalUjianController::class, 'store'])->name('store');
+            Route::put('/{soal}',        [SoalUjianController::class, 'update'])->name('update');
+            Route::delete('/{soal}',     [SoalUjianController::class, 'destroy'])->name('destroy');
+            Route::get('/rekap',         [SoalUjianController::class, 'rekap'])->name('rekap');
+        });
+
         // Absensi
         Route::prefix('absensi')->name('absensi.')->group(function () {
             Route::get('/',        [AbsensiController::class, 'index'])->name('index');
@@ -199,6 +226,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{user}',     [UserController::class, 'destroy'])->name('destroy');
         });
 
+        // Jawaban Ujian
+        Route::prefix('jawaban-ujian')->name('jawaban-ujian.')->group(function () {
+            Route::get('/',                                        [JawabanUjianController::class, 'index'])->name('index');
+            Route::get('/{jadwalUjian}',                           [JawabanUjianController::class, 'show'])->name('show');
+            Route::post('/{jadwalUjian}/update-nilai',             [JawabanUjianController::class, 'updateNilai'])->name('update-nilai');
+            Route::post('/{jadwalUjian}/soal/{soal}/update-kunci', [JawabanUjianController::class, 'updateKunci'])->name('update-kunci');
+        });
+
         // Pengaturan (dialihkan ke log aktivitas)
         Route::get('settings', [ActivityLogController::class, 'index'])->name('settings');
 
@@ -207,5 +242,51 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/',        [ActivityLogController::class, 'index'])->name('index');
             Route::get('/{activityLog}', [ActivityLogController::class, 'show'])->name('show');
         });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Guru Routes — Area khusus guru (akses dengan role teacher)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('guru')->name('guru.')->middleware(['auth', \App\Http\Middleware\EnsureTeacher::class])->group(function () {
+
+    // Dashboard jadwal ujian milik guru
+    Route::prefix('jadwal-ujian')->name('jadwal-ujian.')->group(function () {
+        Route::get('/',                                    [JadwalUjianGuruController::class, 'index'])->name('index');
+        Route::post('/{jadwalUjian}/upload-soal',          [JadwalUjianGuruController::class, 'uploadSoal'])->name('upload-soal');
+        Route::delete('/{jadwalUjian}/hapus-soal',         [JadwalUjianGuruController::class, 'hapusSoal'])->name('hapus-soal');
+    });
+
+    // Jawaban ujian siswa (hanya mapel yang diampu)
+    Route::prefix('jawaban-ujian')->name('jawaban-ujian.')->group(function () {
+        Route::get('/',                                          [JawabanUjianGuruController::class, 'index'])->name('index');
+        Route::get('/{jadwalUjian}',                             [JawabanUjianGuruController::class, 'show'])->name('show');
+        Route::post('/{jadwalUjian}/update-nilai',               [JawabanUjianGuruController::class, 'updateNilai'])->name('update-nilai');
+        Route::post('/{jadwalUjian}/soal/{soal}/update-kunci',   [JawabanUjianGuruController::class, 'updateKunci'])->name('update-kunci');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Murid Routes — Area khusus murid (akses dengan role student)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('murid')->name('murid.')->middleware(['auth', \App\Http\Middleware\EnsureStudent::class])->group(function () {
+
+    // Dashboard murid
+    Route::get('dashboard', function () {
+        return redirect()->route('murid.ujian.index');
+    })->name('dashboard');
+
+    // Ujian
+    Route::prefix('ujian')->name('ujian.')->group(function () {
+        Route::get('/',                                      [UjianController::class, 'index'])->name('index');
+        Route::get('/{jadwalUjian}',                         [UjianController::class, 'show'])->name('show');
+        Route::get('/{jadwalUjian}/kerjakan',                [UjianController::class, 'kerjakan'])->name('kerjakan');
+        Route::post('/{jadwalUjian}/jawaban',                [UjianController::class, 'simpanJawaban'])->name('jawaban');
+        Route::post('/{jadwalUjian}/submit',                 [UjianController::class, 'submit'])->name('submit');
+        Route::get('/{jadwalUjian}/hasil',                   [UjianController::class, 'hasil'])->name('hasil');
     });
 });

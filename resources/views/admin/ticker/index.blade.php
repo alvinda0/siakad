@@ -316,12 +316,10 @@
     </div>
 </div>
 
-@push('styles')
 <style>
     @keyframes marquee { 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
     .animate-marquee { display:inline-block; animation: marquee 25s linear infinite; }
 </style>
-@endpush
 
 <script>
 (function () {

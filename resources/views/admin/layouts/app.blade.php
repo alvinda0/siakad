@@ -182,7 +182,19 @@
         <a href="{{ route('admin.jadwal.index') }}" data-spa
            class="nav-item" data-route="admin.jadwal.index">
             <span class="icon">🗓️</span>
-            <span class="sidebar-label">Jadwal</span>
+            <span class="sidebar-label">Jadwal Pelajaran</span>
+        </a>
+
+        <a href="{{ route('admin.jadwal-ujian.index') }}" data-spa
+           class="nav-item" data-route="admin.jadwal-ujian.index">
+            <span class="icon">📝</span>
+            <span class="sidebar-label">Jadwal Ujian</span>
+        </a>
+
+        <a href="{{ route('admin.jawaban-ujian.index') }}" data-spa
+           class="nav-item" data-route="admin.jawaban-ujian.index">
+            <span class="icon">📋</span>
+            <span class="sidebar-label">Jawaban Ujian</span>
         </a>
 
         <a href="{{ route('admin.absensi.index') }}" data-spa

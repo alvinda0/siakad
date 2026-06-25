@@ -3,7 +3,7 @@
 @section('title', 'Tambah Murid')
 @section('breadcrumb', 'Tambah Murid')
 
-@push('styles')
+@section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 <style>
     /* ── Choices.js overrides (sama dengan halaman /daftar) ── */
@@ -89,9 +89,7 @@
     .error-msg { font-size: .75rem; color: #EF4444; margin-top: .25rem; }
     .group-label { font-size: .7rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
 </style>
-@endpush
 
-@section('content')
 @php
     $profile ??= null;
     $currentStep = isset($requestedStep) ? (int) $requestedStep : (int) request('step', $profile ? ($profile->current_step ?? 2) : 1);

@@ -17,9 +17,17 @@ class AdminAuthController extends Controller
      */
     public function showLogin(): View|RedirectResponse
     {
-        // Jika sudah login dan punya role admin/superadmin, langsung ke dashboard
-        if (Auth::check() && Auth::user()->hasRole([Role::ADMIN, Role::SUPERADMIN])) {
-            return redirect()->route('admin.dashboard');
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->hasRole([Role::ADMIN, Role::SUPERADMIN])) {
+                return redirect()->route('admin.dashboard');
+            }
+            if ($user->hasRole(Role::TEACHER)) {
+                return redirect()->route('guru.jadwal-ujian.index');
+            }
+            if ($user->hasRole(Role::STUDENT)) {
+                return redirect()->route('murid.ujian.index');
+            }
         }
 
         return view('admin.login');
@@ -45,25 +53,37 @@ class AdminAuthController extends Controller
 
         $user = Auth::user();
 
-        // Pastikan user memiliki role admin atau superadmin
-        if (! $user->hasRole([Role::ADMIN, Role::SUPERADMIN])) {
-            Auth::logout();
+        // Cek role — admin/superadmin masuk dashboard, teacher masuk portal guru
+        if ($user->hasRole([Role::ADMIN, Role::SUPERADMIN])) {
+            $request->session()->regenerate();
 
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Akun Anda tidak memiliki akses admin.']);
+            ActivityLog::record(
+                action: 'login',
+                model:  $user,
+                label:  $user->name,
+            );
+
+            return redirect()->intended(route('admin.dashboard'));
         }
 
-        $request->session()->regenerate();
+        if ($user->hasRole(Role::TEACHER)) {
+            $request->session()->regenerate();
 
-        // Log aktivitas login
-        ActivityLog::record(
-            action: 'login',
-            model:  $user,
-            label:  $user->name,
-        );
+            return redirect()->intended(route('guru.jadwal-ujian.index'));
+        }
 
-        return redirect()->intended(route('admin.dashboard'));
+        if ($user->hasRole(Role::STUDENT)) {
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('murid.ujian.index'));
+        }
+
+        // Role lain (candidate, dll) tidak punya akses
+        Auth::logout();
+
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'Akun Anda tidak memiliki akses ke sistem ini.']);
     }
 
     /**

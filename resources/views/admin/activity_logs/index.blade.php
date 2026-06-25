@@ -2,7 +2,7 @@
 @section('title', 'Log Aktivitas')
 @section('breadcrumb', 'Log Aktivitas')
 
-@push('styles')
+@section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 <style>
     /* ── Sesuaikan Choices.js dengan desain sistem ── */
@@ -56,9 +56,6 @@
         border-color: transparent transparent #1B7A8A transparent;
     }
 </style>
-@endpush
-
-@section('content')
 <div class="space-y-5">
 
     {{-- Header --}}
@@ -254,9 +251,7 @@
     </div>
 
 </div>
-@endsection
 
-@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
 (function () {
@@ -291,4 +286,4 @@
     });
 })();
 </script>
-@endpush
+@endsection

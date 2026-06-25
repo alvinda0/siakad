@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login Admin — SIAKAD SMK Muhammadiyah Sempor</title>
+    <title>Login — SIAKAD SMK Muhammadiyah Sempor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -117,9 +117,9 @@
             <div class="mb-6">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="text-lg">🔐</span>
-                    <h2 class="text-xl font-extrabold" style="color:var(--navy);">Login Admin</h2>
+                    <h2 class="text-xl font-extrabold" style="color:var(--navy);">Login SIAKAD</h2>
                 </div>
-                <p class="text-sm text-slate-500">Masuk ke panel administrasi sekolah</p>
+                <p class="text-sm text-slate-500">Masuk sebagai Admin atau Guru</p>
             </div>
 
             <!-- Alert validasi Laravel -->
@@ -257,7 +257,7 @@
             <!-- Divider -->
             <div class="flex items-center gap-3 my-6">
                 <div class="flex-1 h-px bg-slate-200"></div>
-                <span class="text-xs text-slate-400 font-medium">Area Admin</span>
+                <span class="text-xs text-slate-400 font-medium">Admin & Guru</span>
                 <div class="flex-1 h-px bg-slate-200"></div>
             </div>
 
