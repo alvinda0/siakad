@@ -30,6 +30,14 @@ class JadwalUjianGuruController extends Controller
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal', $request->bulan);
         }
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        // Jika tidak ada filter tanggal maupun bulan, sembunyikan yang sudah lewat
+        if (!$request->filled('bulan') && !$request->filled('tanggal')) {
+            $query->whereDate('tanggal', '>=', now()->startOfDay());
+        }
 
         $ujian = $query->orderBy('tanggal')->orderBy('jam_mulai')->get();
 

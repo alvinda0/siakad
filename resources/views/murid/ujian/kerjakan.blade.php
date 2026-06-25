@@ -280,12 +280,13 @@
                     class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
                 Lanjut Kerjakan
             </button>
-            <form method="POST" action="{{ route('murid.ujian.submit', $jadwalUjian) }}" class="flex-1">
+            <form method="POST" action="{{ route('murid.ujian.submit', $jadwalUjian) }}" class="flex-1" id="form-submit-ujian">
                 @csrf
-                <button type="submit"
-                        class="w-full py-2.5 rounded-xl text-sm font-bold text-white transition hover:brightness-110"
+                <button type="submit" id="btn-submit-ujian"
+                        class="w-full py-2.5 rounded-xl text-sm font-bold text-white transition hover:brightness-110 flex items-center justify-center gap-2"
                         style="background: var(--teal);">
-                    Ya, Selesaikan!
+                    <img id="submit-loading-img" src="{{ asset('image/smk.png') }}" alt="Loading" class="w-4 h-4 object-contain animate-spin hidden">
+                    <span id="submit-label">Ya, Selesaikan!</span>
                 </button>
             </form>
         </div>
@@ -381,6 +382,14 @@ function konfirmasiSelesai() {
 /* Tutup modal klik backdrop */
 document.getElementById('modal-selesai').addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
+});
+
+/* ── Loading state on submit ujian ── */
+document.getElementById('form-submit-ujian').addEventListener('submit', function () {
+    const btn = document.getElementById('btn-submit-ujian');
+    btn.disabled = true;
+    document.getElementById('submit-label').textContent = 'Memproses…';
+    document.getElementById('submit-loading-img').classList.remove('hidden');
 });
 </script>
 @endpush

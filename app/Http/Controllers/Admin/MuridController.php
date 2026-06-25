@@ -16,13 +16,60 @@ class MuridController extends Controller
     {
         $perPage = in_array((int) $request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 15;
 
-        $murid = User::whereHas('roles', fn($q) => $q->where('name', Role::STUDENT))
-                     ->with(['roles', 'kandidatProfile.kelas'])
-                     ->latest()
-                     ->paginate($perPage)
-                     ->withQueryString();
+        $query = User::whereHas('roles', fn($q) => $q->where('name', Role::STUDENT))
+                     ->with(['roles', 'kandidatProfile.kelas']);
 
-        return view('admin.murid.index', compact('murid'));
+        // Filter pencarian nama / email
+        if ($request->filled('cari')) {
+            $query->where(fn($q) => $q->where('name', 'like', '%' . $request->cari . '%')
+                                       ->orWhere('email', 'like', '%' . $request->cari . '%'));
+        }
+
+        // Filter kelas
+        if ($request->filled('kelas_id')) {
+            if ($request->kelas_id === 'belum') {
+                // Murid yang belum punya kelas
+                $query->whereHas('kandidatProfile', fn($q) => $q->whereNull('kelas_id'))
+                      ->orWhereDoesntHave('kandidatProfile');
+            } else {
+                $query->whereHas('kandidatProfile', fn($q) => $q->where('kelas_id', $request->kelas_id));
+            }
+        }
+
+        $murid = $query->latest()->paginate($perPage)->withQueryString();
+
+        $kelasList = \App\Models\Kelas::orderByRaw("CASE tingkat WHEN 'X' THEN 1 WHEN 'XI' THEN 2 WHEN 'XII' THEN 3 ELSE 4 END")
+                                      ->orderBy('jurusan')
+                                      ->orderBy('nama')
+                                      ->get();
+
+        // Hitung murid belum punya kelas (untuk badge)
+        $belumKelasCount = User::whereHas('roles', fn($q) => $q->where('name', Role::STUDENT))
+            ->where(fn($q) => $q
+                ->whereHas('kandidatProfile', fn($q2) => $q2->whereNull('kelas_id'))
+                ->orWhereDoesntHave('kandidatProfile')
+            )->count();
+
+        return view('admin.murid.index', compact('murid', 'kelasList', 'belumKelasCount'));
+    }
+
+    /**
+     * Bulk assign kelas untuk banyak murid sekaligus.
+     */
+    public function bulkAssignKelas(Request $request)
+    {
+        $request->validate([
+            'murid_ids'   => ['required', 'array'],
+            'murid_ids.*' => ['exists:users,id'],
+            'kelas_id'    => ['required', 'exists:kelas,id'],
+        ]);
+
+        $updated = KandidatProfile::whereIn('user_id', $request->murid_ids)
+            ->update(['kelas_id' => $request->kelas_id]);
+
+        $kelas = \App\Models\Kelas::find($request->kelas_id);
+
+        return back()->with('success', "{$updated} murid berhasil di-assign ke kelas {$kelas->nama}.");
     }
 
     public function show(User $user)

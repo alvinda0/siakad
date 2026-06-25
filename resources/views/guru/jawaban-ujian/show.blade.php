@@ -11,6 +11,7 @@
     .pilihan-salah   { background:#fee2e2; color:#991b1b; }
     .pilihan-default { background:#f8fafc; color:#475569; }
     .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem; }
+    .modal-overlay.modal-hidden { display:none !important; }
     .modal-box { background:#fff;border-radius:1.25rem;padding:1.5rem;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2); }
 </style>
 @endpush
@@ -351,11 +352,11 @@
     </div>{{-- end grid --}}
 
     {{-- ═══════ MODAL EDIT KUNCI JAWABAN ═══════ --}}
-    <div id="modal-kunci" class="modal-overlay hidden" onclick="closeKunciModal(event)">
+    <div id="modal-kunci" class="modal-overlay modal-hidden">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-extrabold text-slate-800 text-base">🔑 Edit Kunci Jawaban</h3>
-                <button type="button" onclick="closeKunciModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition">
+                <button type="button" onclick="document.getElementById('modal-kunci').classList.add('modal-hidden')" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -383,7 +384,7 @@
                     @endforeach
                 </div>
                 <div class="flex gap-2 justify-end">
-                    <button type="button" onclick="closeKunciModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="button" onclick="document.getElementById('modal-kunci').classList.add('modal-hidden')" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2 rounded-xl text-sm font-semibold text-white hover:brightness-110 transition" style="background:var(--teal)">Simpan & Hitung Ulang</button>
                 </div>
             </form>
@@ -397,7 +398,7 @@
                           class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-300 mb-4"
                           placeholder="Tulis kunci jawaban essay..."></textarea>
                 <div class="flex gap-2 justify-end">
-                    <button type="button" onclick="closeKunciModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="button" onclick="document.getElementById('modal-kunci').classList.add('modal-hidden')" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2 rounded-xl text-sm font-semibold text-white hover:brightness-110 transition" style="background:var(--teal)">Simpan & Hitung Ulang</button>
                 </div>
             </form>
@@ -436,12 +437,12 @@ function openKunciModal(soalId, tipe, kunciPg, kunciEssay, muridId) {
         document.getElementById('kunci-essay-input').value = kunciEssay || '';
     }
 
-    modal.classList.remove('hidden');
+    modal.classList.remove('modal-hidden');
 }
 
-function closeKunciModal(e) {
-    if (e && e.target !== document.getElementById('modal-kunci')) return;
-    document.getElementById('modal-kunci').classList.add('hidden');
-}
+// Tutup modal saat klik overlay (di luar modal-box)
+document.getElementById('modal-kunci').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('modal-hidden');
+});
 </script>
 @endpush

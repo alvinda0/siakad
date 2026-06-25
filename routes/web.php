@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\JawabanUjianController;
 use App\Http\Controllers\Guru\JadwalUjianGuruController;
 use App\Http\Controllers\Guru\JawabanUjianGuruController;
 use App\Http\Controllers\Murid\UjianController;
+use App\Http\Controllers\Murid\NilaiMuridController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
@@ -86,11 +87,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Murid
         Route::prefix('murid')->name('murid.')->group(function () {
-            Route::get('/',                       [MuridController::class, 'index'])->name('index');
-            Route::get('create',                  [MuridController::class, 'create'])->name('create');
-            Route::post('create',                 [MuridController::class, 'store'])->name('store');
-            Route::get('/{user}',                 [MuridController::class, 'show'])->name('show');
-            Route::patch('/{user}/assign-kelas',  [MuridController::class, 'assignKelas'])->name('assign-kelas');
+            Route::get('/',                          [MuridController::class, 'index'])->name('index');
+            Route::get('create',                     [MuridController::class, 'create'])->name('create');
+            Route::post('create',                    [MuridController::class, 'store'])->name('store');
+            Route::post('/bulk-assign-kelas',        [MuridController::class, 'bulkAssignKelas'])->name('bulk-assign-kelas');
+            Route::get('/{user}',                    [MuridController::class, 'show'])->name('show');
+            Route::patch('/{user}/assign-kelas',     [MuridController::class, 'assignKelas'])->name('assign-kelas');
         });
 
         // Kandidat PPDB
@@ -138,7 +140,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/{jadwalUjian}/toggle-aktif',    [JadwalUjianController::class, 'toggleAktif'])->name('toggle-aktif');
             Route::post('/{jadwalUjian}/upload-soal',      [JadwalUjianController::class, 'uploadSoal'])->name('upload-soal');
             Route::delete('/{jadwalUjian}/hapus-soal',     [JadwalUjianController::class, 'hapusSoal'])->name('hapus-soal');
-            Route::post('/{jadwalUjian}/upload-kunci',     [JadwalUjianController::class, 'uploadKunci'])->name('upload-kunci');
+            Route::post('/{jadwalUjian}/upload-kunci',          [JadwalUjianController::class, 'uploadKunci'])->name('upload-kunci');
+            Route::get('/{jadwalUjian}/download-template-kunci', [JadwalUjianController::class, 'downloadTemplateKunci'])->name('download-template-kunci');
+            Route::get('/{jadwalUjian}/download-template-soal',  [JadwalUjianController::class, 'downloadTemplateSoal'])->name('download-template-soal');
         });
 
         // Soal Ujian (manajemen soal per jadwal ujian)
@@ -159,9 +163,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Nilai
         Route::prefix('nilai')->name('nilai.')->group(function () {
-            Route::get('/',        [NilaiController::class, 'index'])->name('index');
-            Route::post('/simpan', [NilaiController::class, 'simpan'])->name('simpan');
-            Route::get('/rekap',   [NilaiController::class, 'rekap'])->name('rekap');
+            Route::get('/',          [NilaiController::class, 'index'])->name('index');
+            Route::post('/simpan',   [NilaiController::class, 'simpan'])->name('simpan');
+            Route::get('/rekap',     [NilaiController::class, 'rekap'])->name('rekap');
+            Route::post('/sync-ujian', [NilaiController::class, 'syncUjian'])->name('sync-ujian');
         });
 
         // Informasi (Beasiswa & Promo Program Strategis)
@@ -288,5 +293,10 @@ Route::prefix('murid')->name('murid.')->middleware(['auth', \App\Http\Middleware
         Route::post('/{jadwalUjian}/jawaban',                [UjianController::class, 'simpanJawaban'])->name('jawaban');
         Route::post('/{jadwalUjian}/submit',                 [UjianController::class, 'submit'])->name('submit');
         Route::get('/{jadwalUjian}/hasil',                   [UjianController::class, 'hasil'])->name('hasil');
+    });
+
+    // Nilai (read-only)
+    Route::prefix('nilai')->name('nilai.')->group(function () {
+        Route::get('/', [NilaiMuridController::class, 'index'])->name('index');
     });
 });

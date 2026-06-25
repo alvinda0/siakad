@@ -37,6 +37,14 @@ class JadwalUjianController extends Controller
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal', $request->bulan);
         }
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        // Jika tidak ada filter tanggal maupun bulan, sembunyikan yang sudah lewat
+        if (!$request->filled('bulan') && !$request->filled('tanggal')) {
+            $query->whereDate('tanggal', '>=', now()->startOfDay());
+        }
 
         $ujian = $query->orderBy('tanggal')->orderBy('jam_mulai')->get();
 
@@ -486,6 +494,64 @@ class JadwalUjianController extends Controller
     }
 
     /**
+     * Download template CSV kunci jawaban untuk ujian tertentu.
+     * Berisi nomor soal, tipe, dan kolom kunci yang sudah terisi (jika ada).
+     */
+    public function downloadTemplateKunci(JadwalUjian $jadwalUjian)
+    {
+        $soalList = SoalUjian::where('jadwal_ujian_id', $jadwalUjian->id)
+            ->orderBy('nomor')
+            ->get(['nomor', 'tipe', 'kunci_jawaban', 'kunci_jawaban_essay']);
+
+        $mapelNama = preg_replace('/[^A-Za-z0-9\-_]/', '_', $jadwalUjian->mataPelajaran->nama);
+        $filename  = "template_kunci_{$mapelNama}_{$jadwalUjian->jenis}.csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control'       => 'no-store, no-cache',
+        ];
+
+        $callback = function () use ($soalList) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM UTF-8 agar Excel membaca karakter Indonesia dengan benar
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Header baris
+            fputcsv($handle, ['nomor', 'kunci', 'tipe_soal', 'keterangan']);
+
+            if ($soalList->isEmpty()) {
+                // Contoh baris jika belum ada soal
+                fputcsv($handle, ['1', 'A', 'pilihan_ganda', 'Isi kolom kunci dengan A/B/C/D untuk PG atau teks untuk essay']);
+                fputcsv($handle, ['2', 'B', 'pilihan_ganda', '']);
+                fputcsv($handle, ['3', '', 'essay', 'Tulis jawaban model di kolom kunci untuk soal essay']);
+            } else {
+                foreach ($soalList as $soal) {
+                    $kunci = $soal->tipe === 'pilihan_ganda'
+                        ? ($soal->kunci_jawaban ?? '')
+                        : ($soal->kunci_jawaban_essay ?? '');
+
+                    $keterangan = $soal->tipe === 'pilihan_ganda'
+                        ? 'Isi dengan A, B, C, atau D'
+                        : 'Isi dengan teks jawaban model (untuk auto-grade essay)';
+
+                    fputcsv($handle, [
+                        $soal->nomor,
+                        $kunci,
+                        $soal->tipe,
+                        $keterangan,
+                    ]);
+                }
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
      * Upload kunci jawaban dari file CSV/Excel.
      * Format: kolom pertama = nomor soal, kolom kedua = kunci (A/B/C/D atau teks essay).
      * Baris pertama boleh header (nomor,kunci) — akan dilewati otomatis.
@@ -582,5 +648,125 @@ class JadwalUjianController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    /**
+     * Download template Word (.docx) untuk upload soal ujian.
+     * Format: setiap soal diawali "SOAL X." dengan pilihan A/B/C/D dan baris "KUNCI: X".
+     */
+    public function downloadTemplateSoal(JadwalUjian $jadwalUjian)
+    {
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+
+        // Gaya dokumen
+        $phpWord->setDefaultFontName('Times New Roman');
+        $phpWord->setDefaultFontSize(12);
+
+        $phpWord->addTitleStyle(1, ['bold' => true, 'size' => 14, 'name' => 'Times New Roman']);
+
+        $section = $phpWord->addSection([
+            'marginTop'    => 1134, // ~2cm
+            'marginBottom' => 1134,
+            'marginLeft'   => 1701, // ~3cm
+            'marginRight'  => 1134,
+        ]);
+
+        // Header dokumen
+        $section->addText(
+            strtoupper('Template Soal Ujian'),
+            ['bold' => true, 'size' => 14, 'name' => 'Times New Roman'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+        );
+
+        $mapel = $jadwalUjian->mataPelajaran->nama ?? 'Mata Pelajaran';
+        $jenis = $jadwalUjian->jenis ?? '';
+        $kelas = optional($jadwalUjian->kelas)->nama ?? '';
+
+        $section->addText(
+            "{$mapel} — {$jenis}" . ($kelas ? " | Kelas {$kelas}" : ''),
+            ['size' => 11, 'name' => 'Times New Roman', 'color' => '555555'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+        );
+
+        $section->addTextBreak(1);
+
+        // Petunjuk
+        $section->addText('PETUNJUK PENGISIAN:', ['bold' => true, 'size' => 11, 'name' => 'Times New Roman']);
+        $petunjuk = [
+            'Tulis soal setelah teks "SOAL X." (ganti X dengan nomor urut).',
+            'Untuk soal pilihan ganda, isi pilihan A, B, C, D di bawah soal.',
+            'Tulis kunci jawaban di baris "KUNCI: X" (X = A/B/C/D untuk PG, atau jawaban teks untuk essay).',
+            'Untuk soal essay, kosongkan pilihan A–D atau hapus baris tersebut.',
+            'Jangan mengubah format penanda: SOAL X., A., B., C., D., KUNCI:',
+        ];
+        foreach ($petunjuk as $i => $p) {
+            $section->addText(($i + 1) . '. ' . $p, ['size' => 10, 'name' => 'Times New Roman']);
+        }
+
+        $section->addTextBreak(1);
+        $section->addText(str_repeat('─', 72), ['size' => 9, 'color' => 'AAAAAA', 'name' => 'Courier New']);
+        $section->addTextBreak(1);
+
+        // Contoh 3 soal pilihan ganda + 1 essay
+        $contohSoal = [
+            [
+                'teks'    => 'Tuliskan pertanyaan soal pilihan ganda nomor 1 di sini.',
+                'pilihan' => ['A. Pilihan jawaban A', 'B. Pilihan jawaban B', 'C. Pilihan jawaban C', 'D. Pilihan jawaban D'],
+                'kunci'   => 'A',
+            ],
+            [
+                'teks'    => 'Tuliskan pertanyaan soal pilihan ganda nomor 2 di sini.',
+                'pilihan' => ['A. Pilihan jawaban A', 'B. Pilihan jawaban B', 'C. Pilihan jawaban C', 'D. Pilihan jawaban D'],
+                'kunci'   => 'B',
+            ],
+            [
+                'teks'    => 'Tuliskan pertanyaan soal pilihan ganda nomor 3 di sini.',
+                'pilihan' => ['A. Pilihan jawaban A', 'B. Pilihan jawaban B', 'C. Pilihan jawaban C', 'D. Pilihan jawaban D'],
+                'kunci'   => 'C',
+            ],
+            [
+                'teks'    => 'Tuliskan pertanyaan soal essay nomor 4 di sini.',
+                'pilihan' => [],
+                'kunci'   => 'Tulis kunci jawaban essay di sini.',
+            ],
+        ];
+
+        foreach ($contohSoal as $i => $soal) {
+            $no = $i + 1;
+            // Nomor & teks soal
+            $section->addText("SOAL {$no}.", ['bold' => true, 'size' => 12, 'name' => 'Times New Roman']);
+            $section->addText($soal['teks'], ['size' => 12, 'name' => 'Times New Roman']);
+
+            // Pilihan (jika ada)
+            foreach ($soal['pilihan'] as $pilihan) {
+                $section->addText($pilihan, ['size' => 12, 'name' => 'Times New Roman'], ['indent' => 0.5]);
+            }
+
+            // Kunci
+            $section->addText("KUNCI: {$soal['kunci']}", ['bold' => true, 'size' => 11, 'name' => 'Times New Roman', 'color' => '1E6E42']);
+            $section->addTextBreak(1);
+        }
+
+        // Tambah 6 soal kosong ekstra (no 5–10) untuk diisi
+        for ($i = 5; $i <= 10; $i++) {
+            $section->addText("SOAL {$i}.", ['bold' => true, 'size' => 12, 'name' => 'Times New Roman']);
+            $section->addText('Tulis pertanyaan di sini.', ['size' => 12, 'name' => 'Times New Roman', 'color' => 'BBBBBB']);
+            $section->addText('A. ', ['size' => 12, 'name' => 'Times New Roman', 'color' => 'BBBBBB'], ['indent' => 0.5]);
+            $section->addText('B. ', ['size' => 12, 'name' => 'Times New Roman', 'color' => 'BBBBBB'], ['indent' => 0.5]);
+            $section->addText('C. ', ['size' => 12, 'name' => 'Times New Roman', 'color' => 'BBBBBB'], ['indent' => 0.5]);
+            $section->addText('D. ', ['size' => 12, 'name' => 'Times New Roman', 'color' => 'BBBBBB'], ['indent' => 0.5]);
+            $section->addText('KUNCI: ', ['bold' => true, 'size' => 11, 'name' => 'Times New Roman', 'color' => '1E6E42']);
+            $section->addTextBreak(1);
+        }
+
+        $filename = 'template-soal-' . \Illuminate\Support\Str::slug($mapel . '-' . $jenis) . '.docx';
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'soal_') . '.docx';
+        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $writer->save($tmpPath);
+
+        return response()->download($tmpPath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
     }
 }

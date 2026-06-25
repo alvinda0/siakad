@@ -100,6 +100,12 @@
             <span class="sidebar-label">Ujian Online</span>
         </a>
 
+        <a href="{{ route('murid.nilai.index') }}"
+           class="nav-item {{ request()->routeIs('murid.nilai.*') ? 'active' : '' }}">
+            <span class="icon">📊</span>
+            <span class="sidebar-label">Nilai Saya</span>
+        </a>
+
     </nav>
 
     <!-- User info + logout -->
